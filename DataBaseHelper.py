@@ -1,6 +1,5 @@
 
 import psycopg2
-import config
 
 
 def create_tables():
@@ -12,7 +11,8 @@ def create_tables():
             Company_name VARCHAR(255) NOT NULL
         )
         """,
-        """ CREATE TABLE Station (
+        """ 
+        CREATE TABLE Station (
                 UID SERIAL PRIMARY KEY,
                 Time_charing INTEGER NOT NULL,
                 Location VARCHAR(255) NOT NULL,
@@ -25,8 +25,7 @@ def create_tables():
         """)
     conn = None
     try:
-        params = config()
-        conn = psycopg2.connect(**params)
+        conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
         cur = conn.cursor()
         for command in commands:
             cur.execute(command)
