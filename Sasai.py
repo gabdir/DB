@@ -1,0 +1,1 @@
+print("Aidar pedik")
