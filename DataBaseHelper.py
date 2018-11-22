@@ -5,6 +5,52 @@ import psycopg2
 def create_tables():
     """ create tables in the PostgreSQL database"""
     commands2 = (
+        """
+        CREATE TABLE Car (
+            Identification_num SERIAL PRIMARY KEY,
+            Model VARCHAR(255) NOT NULL,
+            Status VARCHAR(255) NOT NULL,
+            Color VARCHAR(10) NOT NULL,
+            Location SERIAL NOT NULL,
+            c_company SERIAL NOT NULL,
+            FOREIGN KEY (c_company) REFERENCES Company(Company_id) ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        """,
+        """
+        CREATE TABLE History_of_charging (
+            Identification_num SERIAL,
+            UID SERIAL,
+            starting_ch DOUBLE PRECISION,
+            ending_ch DOUBLE PRECISION,
+            price DOUBLE PRECISION,
+            FOREIGN KEY (Identification_num) REFERENCES Car(Identification_num) ON UPDATE CASCADE ON DELETE CASCADE,
+            FOREIGN KEY (UID) REFERENCES Station(UID) ON UPDATE CASCADE ON DELETE CASCADE,
+            PRIMARY KEY(UID,Identification_num)
+        )
+        """,
+        """
+        CREATE TABLE History (
+            Identification_num SERIAL,
+            Username VARCHAR(30),
+            starting_loc SERIAL,
+            client_loc SERIAL,
+            final_loc SERIAL,
+            FOREIGN KEY (Identification_num) REFERENCES Car(Identification_num) ON UPDATE CASCADE ON DELETE CASCADE,
+            FOREIGN KEY (Username) REFERENCES Customer(Username) ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        """,
+        """
+        CREATE TABLE History_of_repairing(
+            Identification_num SERIAL,
+            WID SERIAL,
+            price DOUBLE PRECISION,
+            Car_parts VARCHAR(40),
+            data VARCHAR(10),
+            PRIMARY KEY (WID,Identification_num),
+            FOREIGN KEY (Identification_num) REFERENCES Car(Identification_num) ON UPDATE CASCADE ON DELETE CASCADE,
+            FOREIGN KEY (WID) REFERENCES Workshops(WID) ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        """
 
     )
     commands = (
@@ -86,14 +132,6 @@ def create_tables():
 
         """,
         """
-        CREATE TABLE History (
-            Identification_num SERIAL,
-            Username VARCHAR(30),
-            FOREIGN KEY (Identification_num) REFERENCES Car(Identification_num) ON UPDATE CASCADE ON DELETE CASCADE,
-            FOREIGN KEY (Username) REFERENCES Customer(Username) ON UPDATE CASCADE ON DELETE CASCADE
-        )
-        """,
-        """
         CREATE TABLE History_of_providing (
             WID SERIAL,
             PCompany_id SERIAL,
@@ -109,6 +147,8 @@ def create_tables():
         conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
         cur = conn.cursor()
 
+        '''''for command in commands2:
+            cur.execute(command)'''''
         for command in commands2:
             cur.execute(command)
 
