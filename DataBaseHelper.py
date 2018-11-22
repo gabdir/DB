@@ -23,16 +23,16 @@ def create_tables():
             company SERIAL REFERENCES Company(Company_id) ON UPDATE CASCADE ON DELETE CASCADE
         )
         """,
-        """
-        CREATE TABLE Car (
-            Identification_num SERIAL PRIMARY KEY,
-            Model VARCHAR(255) NOT NULL,
-            Status VARCHAR(255) NOT NULL,
-            Location SERIAL NOT NULL,
-            c_company SERIAL NOT NULL,
-            FOREIGN KEY (c_company) REFERENCES Company(Company_id) ON UPDATE CASCADE ON DELETE CASCADE
-        )
-        """,
+        # """
+        # CREATE TABLE Car (
+        #     Identification_num SERIAL PRIMARY KEY,
+        #     Model VARCHAR(255) NOT NULL,
+        #     Status VARCHAR(255) NOT NULL,
+        #     Location SERIAL NOT NULL,
+        #     c_company SERIAL NOT NULL,
+        #     FOREIGN KEY (c_company) REFERENCES Company(Company_id) ON UPDATE CASCADE ON DELETE CASCADE
+        # )
+        # """,
         """
         CREATE TABLE Workshops (
             WID SERIAL PRIMARY KEY,
@@ -92,17 +92,17 @@ def create_tables():
             PRIMARY KEY(WID,PCompany_id)
         )
         """,
-        """
-        CREATE TABLE Car (
-            Identification_num SERIAL PRIMARY KEY,
-            Model VARCHAR(255) NOT NULL,
-            Status VARCHAR(255) NOT NULL,
-            Color VARCHAR(10) NOT NULL,
-            Location SERIAL NOT NULL,
-            c_company SERIAL NOT NULL,
-            FOREIGN KEY (c_company) REFERENCES Company(Company_id) ON UPDATE CASCADE ON DELETE CASCADE
-        )
-        """,
+        # """
+        # CREATE TABLE Car (
+        #     Identification_num SERIAL PRIMARY KEY,
+        #     Model VARCHAR(255) NOT NULL,
+        #     Status VARCHAR(255) NOT NULL,
+        #     Color VARCHAR(10) NOT NULL,
+        #     Location SERIAL NOT NULL,
+        #     c_company SERIAL NOT NULL,
+        #     FOREIGN KEY (c_company) REFERENCES Company(Company_id) ON UPDATE CASCADE ON DELETE CASCADE
+        # )
+        # """,
         """
         CREATE TABLE History_of_charging (
             Identification_num SERIAL,
@@ -147,7 +147,7 @@ def create_tables():
 
         '''''for command in commands2:
             cur.execute(command)'''''
-        for command in commands2:
+        for command in commands:
             cur.execute(command)
 
         cur.close()
@@ -159,6 +159,38 @@ def create_tables():
         if conn is not None:
             conn.close()
 
+def delete_tables():
+    command = """
+    DROP TABLE 
+    Company, 
+    Station,
+    Workshops, 
+    Provider, 
+    Payment,  
+    Car, 
+    Customer, 
+    History_of_providing, 
+    History_of_charging,
+    History, 
+    History_of_repairing   CASCADE 
+    """
+    conn = None
+    try:
+        conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
+        cur = conn.cursor()
+
+        '''''for command in commands2:
+            cur.execute(command)'''''
+        cur.execute(command)
+
+        cur.close()
+
+        conn.commit()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
 
 if __name__ == '__main__':
         create_tables()
