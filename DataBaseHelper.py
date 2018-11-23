@@ -1,5 +1,6 @@
 import psycopg2
 
+
 def create_tables():
     """ create tables in the PostgreSQL database"""
     commands = (
@@ -12,23 +13,23 @@ def create_tables():
         """ 
         CREATE TABLE Station (
             UID SERIAL PRIMARY KEY,
-            Time_charing INTEGER NOT NULL,
-            Location VARCHAR(255) NOT NULL,
+            Time_charging TIME NOT NULL,
+            Location POINT NOT NULL,
             Price_of_charging INTEGER NOT NULL,
             Plug_formats VARCHAR(255) NOT NULL,
             Free_sockets INTEGER NOT NULL,
             Amount_of_sockets INTEGER NOT NULL,
-            company SERIAL REFERENCES Company(Company_id) ON UPDATE CASCADE ON DELETE CASCADE
+            company_id SERIAL REFERENCES Company(Company_id) ON UPDATE CASCADE ON DELETE CASCADE
         )
         """,
         """
         CREATE TABLE Workshops (
             WID SERIAL PRIMARY KEY,
-            Location VARCHAR(255) NOT NULL,
+            Location POINT NOT NULL,
             Available_car_p VARCHAR(255) NOT NULL,
-            Available_time DOUBLE PRECISION NOT NULL,
-            w_company SERIAL NOT NULL,
-            FOREIGN KEY (w_company) REFERENCES Company(Company_id) ON UPDATE CASCADE ON DELETE CASCADE
+            Available_time VARCHAR(255) NOT NULL,
+            company_id SERIAL NOT NULL,
+            FOREIGN KEY (company_id) REFERENCES Company(Company_id) ON UPDATE CASCADE ON DELETE CASCADE
         )
         """,
         """
@@ -40,24 +41,16 @@ def create_tables():
         )
         """,
         """
-        CREATE TABLE Payment (
-            PCompany_id SERIAL,
-            Company_id SERIAL,
-            FOREIGN KEY (Company_id) REFERENCES Company(Company_id) ON UPDATE CASCADE ON DELETE CASCADE,
-            FOREIGN KEY (PCompany_id) REFERENCES Provider(PCompany_id) ON UPDATE CASCADE ON DELETE CASCADE     
-        )
-        """,
-        """
         CREATE TABLE Car (
             Identification_num SERIAL PRIMARY KEY,
             Model VARCHAR(255) NOT NULL,
             UID SERIAL,
             Status VARCHAR(255) NOT NULL,
-            Location SERIAL NOT NULL,
-            c_company SERIAL NOT NULL,
-            FOREIGN KEY (c_company) REFERENCES Company(Company_id) ON UPDATE CASCADE ON DELETE CASCADE,
-            FOREIGN KEY (UID) REFERENCES Station(UID) ON UPDATE CASCADE ON DELETE CASCADE,
-            Color VARCHAR(10) NOT NULL
+            Location POINT NOT NULL,
+            company_id SERIAL NOT NULL,
+            Color VARCHAR(10) NOT NULL,
+            FOREIGN KEY (company_id) REFERENCES Company(Company_id) ON UPDATE CASCADE ON DELETE CASCADE,
+            FOREIGN KEY (UID) REFERENCES Station(UID) ON UPDATE CASCADE ON DELETE CASCADE
         )
         """,
         """
@@ -65,7 +58,7 @@ def create_tables():
             Username VARCHAR(30) PRIMARY KEY,
             Email VARCHAR(20) NOT NULL,
             Phone_number VARCHAR(10) NOT NULL,
-            Location SERIAL NOT NULL,
+            Location POINT NOT NULL,
             Full_name VARCHAR(30) NOT NULL
         )
 
@@ -84,8 +77,8 @@ def create_tables():
         CREATE TABLE History_of_charging (
             Identification_num SERIAL,
             UID SERIAL,
-            starting_ch DOUBLE PRECISION,
-            ending_ch DOUBLE PRECISION,
+            starting_ch TIME,
+            ending_ch TIME,
             price DOUBLE PRECISION,
             FOREIGN KEY (Identification_num) REFERENCES Car(Identification_num) ON UPDATE CASCADE ON DELETE CASCADE,
             FOREIGN KEY (UID) REFERENCES Station(UID) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -96,11 +89,12 @@ def create_tables():
         CREATE TABLE History_of_trip (
             Identification_num SERIAL,
             Username VARCHAR(30),
-            starting_loc SERIAL,
-            client_loc SERIAL,
-            final_loc SERIAL,
+            starting_loc POINT,
+            client_loc POINT,
+            final_loc POINT,
             FOREIGN KEY (Identification_num) REFERENCES Car(Identification_num) ON UPDATE CASCADE ON DELETE CASCADE,
-            FOREIGN KEY (Username) REFERENCES Customer(Username) ON UPDATE CASCADE ON DELETE CASCADE
+            FOREIGN KEY (Username) REFERENCES Customer(Username) ON UPDATE CASCADE ON DELETE CASCADE,
+            PRIMARY KEY(Username,Identification_num)
         )
         """,
         """
@@ -109,7 +103,7 @@ def create_tables():
             WID SERIAL,
             price DOUBLE PRECISION,
             Car_parts VARCHAR(40),
-            data VARCHAR(10),
+            date DATE,
             PRIMARY KEY (WID,Identification_num),
             FOREIGN KEY (Identification_num) REFERENCES Car(Identification_num) ON UPDATE CASCADE ON DELETE CASCADE,
             FOREIGN KEY (WID) REFERENCES Workshops(WID) ON UPDATE CASCADE ON DELETE CASCADE
@@ -143,8 +137,7 @@ def delete_tables():
     Company, 
     Station,
     Workshops, 
-    Provider, 
-    Payment,  
+    Provider,
     Car, 
     Customer, 
     History_of_providing, 
