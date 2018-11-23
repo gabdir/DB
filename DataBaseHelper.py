@@ -22,16 +22,6 @@ def create_tables():
             company SERIAL REFERENCES Company(Company_id) ON UPDATE CASCADE ON DELETE CASCADE
         )
         """,
-        # """
-        # CREATE TABLE Car (
-        #     Identification_num SERIAL PRIMARY KEY,
-        #     Model VARCHAR(255) NOT NULL,
-        #     Status VARCHAR(255) NOT NULL,
-        #     Location SERIAL NOT NULL,
-        #     c_company SERIAL NOT NULL,
-        #     FOREIGN KEY (c_company) REFERENCES Company(Company_id) ON UPDATE CASCADE ON DELETE CASCADE
-        # )
-        # """,
         """
         CREATE TABLE Workshops (
             WID SERIAL PRIMARY KEY,
@@ -67,8 +57,8 @@ def create_tables():
             Location SERIAL NOT NULL,
             c_company SERIAL NOT NULL,
             FOREIGN KEY (c_company) REFERENCES Company(Company_id) ON UPDATE CASCADE ON DELETE CASCADE,
-            FOREIGN KEY (UID) REFERENCES Station(UID) ON UPDATE CASCADE ON DELETE CASCADE 
-    
+            FOREIGN KEY (UID) REFERENCES Station(UID) ON UPDATE CASCADE ON DELETE CASCADE,
+            Color VARCHAR(10) NOT NULL
         )
         """,
         """
@@ -91,17 +81,6 @@ def create_tables():
             PRIMARY KEY(WID,PCompany_id)
         )
         """,
-        # """
-        # CREATE TABLE Car (
-        #     Identification_num SERIAL PRIMARY KEY,
-        #     Model VARCHAR(255) NOT NULL,
-        #     Status VARCHAR(255) NOT NULL,
-        #     Color VARCHAR(10) NOT NULL,
-        #     Location SERIAL NOT NULL,
-        #     c_company SERIAL NOT NULL,
-        #     FOREIGN KEY (c_company) REFERENCES Company(Company_id) ON UPDATE CASCADE ON DELETE CASCADE
-        # )
-        # """,
         """
         CREATE TABLE History_of_charging (
             Identification_num SERIAL,
