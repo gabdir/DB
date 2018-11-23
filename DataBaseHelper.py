@@ -1,6 +1,5 @@
 import psycopg2
 
-
 def create_tables():
     """ create tables in the PostgreSQL database"""
     commands = (
@@ -178,46 +177,48 @@ def input_sample_data():
     VALUES ('Jane', '1935-08-01')
     """,
                 """
-                INSERT INTO station (time_charing, location, price_of_charging, plug_formats, free_sockets, amount_of_sockets, company) 
-                values ('Jane', '1935-08-01')
+                INSERT INTO station (time_charging, location, price_of_charging, plug_formats, free_sockets, amount_of_sockets) 
+                values ('1:00', 'Kazan', '100', 'first', '5', '7'),
+                    ('3:00', 'Kazan', '300', 'first', '5', '7')
                 """,
                 """
-                INSERT INTO workshops (location, available_car_p, available_time, w_company) 
-                values ('Jane', '1935-08-01')
+                INSERT INTO workshops (location, available_car_p, available_time, company_id) 
+                values ('Kazan', 'some1', '100', '1'),
+                    ('Kazan', 'some2', '200', '2')
                 """,
                 """
                 INSERT INTO provider (phone_num, address, name) 
-                values ('Jane', '1935-08-01')
+                values ('977722677', 'Kazan', 'YaSuperProvider'),
+                    ('977722678', 'Kazan', 'YaSuperProvider')
                 """,
                 """
-                INSERT INTO payment (company_id, company_name) 
-                values ('Jane', '1935-08-01')
+                INSERT INTO car (model, uid, status, location, company_id) 
+                values ('CH11', '1', 'used', 'Kazan', '1'),
+                    ('CH12', '2', 'used', 'Kazan', '1'),
+                    ('CH13', '3', 'used', 'Kazan', '2')
                 """,
                 """
-                INSERT INTO car (model, uid, status, location, c_company) 
-                values ('Jane', '1935-08-01')
+                INSERT INTO customer (email, phone_number, location, full_name) 
+                values ('hernya@mail.ru', '8777345621', 'Kazan', 'cool per'),
+                    ('hernya2@mail.ru', '8777345622', 'Kazan', 'cool por')
+                    """,
+                """
+                INSERT INTO history_of_providing (wid, pcompany_id, type_car_p) 
+                values ('1', '1', 'dich1'),
+                    ('1', '1', 'dich2')
                 """,
                 """
-                    INSERT INTO customer (email, phone_number, location, full_name) 
-                    values ('Jane', '1935-08-01')
-                    """,
+                INSERT INTO history_of_charging (identification_num, uid, starting_ch, ending_ch, price) 
+                values ('1', '1', '8:00', '18:00', '500')
+                """,
                 """
-                    INSERT INTO history_of_providing (wid, pcompany_id, type_car_p) 
-                    values ('Jane', '1935-08-01')
-                    """,
+                INSERT INTO history_of_trip (identification_num, username, starting_loc, client_loc, final_loc) 
+                values ('1', '1', (1, 5), (3, 8), (8, 9))
+                """,
                 """
-                    INSERT INTO history_of_charging (identification_num, uid, starting_ch, ending_ch, price) 
-                    values ('Jane', '1935-08-01')
-                    """,
-                """
-                    INSERT INTO history_of_trip (identification_num, username, starting_loc, client_loc, final_loc) 
-                    values ('Jane', '1935-08-01')
-                    """,
-                """
-                    INSERT INTO history_of_repairing (identification_num, wid, price, car_parts, data) 
-                    values ('Jane', '1935-08-01')
-                    """,
-
+                INSERT INTO history_of_repairing (identification_num, wid, price, car_parts, date) 
+                values ('1', '1', '500', 'dich1', '2018.11.11')
+                """,
                 )
     conn = None
     try:
