@@ -1,4 +1,6 @@
+import datetime
 import psycopg2
+
 
 class DB():
 
@@ -48,6 +50,7 @@ class DB():
                 UID SERIAL,
                 Status VARCHAR(255) NOT NULL,
                 Location POINT NOT NULL,
+                Plate VARCHAR(10),
                 company_id SERIAL NOT NULL,
                 Color VARCHAR(10) NOT NULL,
                 FOREIGN KEY (company_id) REFERENCES Company(Company_id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -93,6 +96,7 @@ class DB():
                 starting_loc POINT,
                 client_loc POINT,
                 final_loc POINT,
+                date DATE,
                 FOREIGN KEY (Identification_num) REFERENCES Car(Identification_num) ON UPDATE CASCADE ON DELETE CASCADE,
                 FOREIGN KEY (Username) REFERENCES Customer(Username) ON UPDATE CASCADE ON DELETE CASCADE,
                 PRIMARY KEY(Username,Identification_num)
@@ -124,9 +128,12 @@ class DB():
             cur.close()
 
             self.conn.commit()
+
         except (Exception, psycopg2.DatabaseError):
             pass
 
+        finally:
+            self.conn.close()
 
     def delete_tables(self):
 
@@ -145,6 +152,8 @@ class DB():
         """
 
         try:
+            self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
+
             cur = self.conn.cursor()
 
             '''''for command in commands2:
@@ -157,6 +166,8 @@ class DB():
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
 
+        finally:
+            self.conn.close()
 
     def input_sample_data(self):
         commands = ("""
@@ -165,46 +176,46 @@ class DB():
         """,
                     """
                     INSERT INTO station (time_charging, location, price_of_charging, plug_formats, free_sockets, amount_of_sockets) 
-                    values ('1:00', 'Kazan', '100', 'first', '5', '7'),
+                    VALUES ('1:00', 'Kazan', '100', 'first', '5', '7'),
                         ('3:00', 'Kazan', '300', 'first', '5', '7')
                     """,
                     """
                     INSERT INTO workshops (location, available_car_p, available_time, company_id) 
-                    values ('Kazan', 'some1', '100', '1'),
+                    VALUES ('Kazan', 'some1', '100', '1'),
                         ('Kazan', 'some2', '200', '2')
                     """,
                     """
                     INSERT INTO provider (phone_num, address, name) 
-                    values ('977722677', 'Kazan', 'YaSuperProvider'),
+                    VALUES ('977722677', 'Kazan', 'YaSuperProvider'),
                         ('977722678', 'Kazan', 'YaSuperProvider')
                     """,
                     """
                     INSERT INTO car (model, uid, status, location, company_id) 
-                    values ('CH11', '1', 'used', 'Kazan', '1'),
+                    VALUES ('CH11', '1', 'used', 'Kazan', '1'),
                         ('CH12', '2', 'used', 'Kazan', '1'),
                         ('CH13', '3', 'used', 'Kazan', '2')
                     """,
                     """
                     INSERT INTO customer (email, phone_number, location, full_name) 
-                    values ('hernya@mail.ru', '8777345621', 'Kazan', 'cool per'),
+                    VALUES ('hernya@mail.ru', '8777345621', 'Kazan', 'cool per'),
                         ('hernya2@mail.ru', '8777345622', 'Kazan', 'cool por')
                         """,
                     """
                     INSERT INTO history_of_providing (wid, pcompany_id, type_car_p) 
-                    values ('1', '1', 'dich1'),
+                    VALUES ('1', '1', 'dich1'),
                         ('1', '1', 'dich2')
                     """,
                     """
                     INSERT INTO history_of_charging (identification_num, uid, starting_ch, ending_ch, price) 
-                    values ('1', '1', '8:00', '18:00', '500')
+                    VALUES ('1', '1', '8:00', '18:00', '500')
                     """,
                     """
                     INSERT INTO history_of_trip (identification_num, username, starting_loc, client_loc, final_loc) 
-                    values ('1', '1', (1, 5), (3, 8), (8, 9))
+                    VALUES ('1', '1', (1, 5), (3, 8), (8, 9))
                     """,
                     """
                     INSERT INTO history_of_repairing (identification_num, wid, price, car_parts, date) 
-                    values ('1', '1', '500', 'dich1', '2018.11.11')
+                    VALUES ('1', '1', '500', 'dich1', '2018.11.11')
                     """,
                     )
         try:
@@ -220,10 +231,67 @@ class DB():
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
 
-    def select_queries(self):
+    class select_queries():
+        def query_1(self, username):
+            query = """SELECT * FROM Car 
+                    WHERE Color='red' AND 
+                    position('AN' IN plate)=0 AND 
+                    identification_num=(
+                        SELECT identification_num FROM history_of_trip 
+                        WHERE username=""" + username + """ AND 
+                        date=""" + str(datetime.datetime.today()).split()[0] + """)
+                """
+            try:
+                self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
+                cur = self.conn.cursor()
+                cur.execute(query)
+                cur.close()
+                self.conn.commit()
+            except (Exception, psycopg2.DatabaseError) as error:
+                print(error)
+
+            finally:
+                self.conn.close()
+
+        def query_2(self, date):
+            for i in range(24):
+                query ="""SELECT COUNT(identification_num) 
+                          FROM history_of_charging 
+                          WHERE starting_ch<""" + date + str(i + 1) + """ and 
+                          ending_ch>""" + date + str(i)
+                try:
+                    self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
+                    cur = self.conn.cursor()
+                    count = cur.execute(query)
+                    cur.close()
+                    self.conn.commit()
+                    print(count)
+                except (Exception, psycopg2.DatabaseError) as error:
+                    print(error)
+
+                finally:
+                    self.conn.close()
+
+        def query_3(self, date):
+            self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
+            cur = self.conn.cursor()
+            time_arr = [[7,10],[12,14],[17,19]]
+            car_amount = cur.execute("""SELECT COUNT(identification_num) FROM Car""")
+            average_amount = [3][7]
+            for i in range(7):
+                for j in time_arr:
+                    query ="""SELECT COUNT(identification_num) 
+                              FROM history_of_trip 
+                              WHERE starting_ch<""" + date + str(j[0]) + """ and 
+                              ending_ch>""" + date + str(j[1])
+                    average_amount[j][i] = cur.execute(query)/car_amount
+
+            morning = average_amount[0].sum()
+            afternoon = average_amount[1].sum()
+            evening = average_amount[2].sum()
+
+            self.conn.close()
 
 
 if __name__ == '__main__':
     db = DB()
-
-
