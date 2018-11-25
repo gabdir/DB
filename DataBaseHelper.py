@@ -16,13 +16,13 @@ class DB():
             """ 
             CREATE TABLE Station (
                 UID SERIAL PRIMARY KEY,
-                Time_charging TIME NOT NULL,
                 Location POINT NOT NULL,
                 Price_of_charging INTEGER NOT NULL,
                 Plug_formats VARCHAR(255) NOT NULL,
                 Free_sockets INTEGER NOT NULL,
                 Amount_of_sockets INTEGER NOT NULL,
-                company_id SERIAL REFERENCES Company(company_id) ON UPDATE CASCADE ON DELETE CASCADE
+                company_id SERIAL NOT NULL,
+                FOREIGN KEY (company_id) REFERENCES Company(company_id) ON UPDATE CASCADE ON DELETE CASCADE
             )
             """,
             """
@@ -45,7 +45,7 @@ class DB():
             """,
             """
             CREATE TABLE Customer (
-                Username VARCHAR(30) PRIMARY KEY,
+                Username SERIAL PRIMARY KEY,
                 Email VARCHAR(20) NOT NULL,
                 Phone_number VARCHAR(10) NOT NULL,
                 Location POINT NOT NULL,
@@ -58,7 +58,7 @@ class DB():
                 Identification_num SERIAL PRIMARY KEY,
                 Model VARCHAR(255) NOT NULL,
                 UID SERIAL,
-                Username VARCHAR(30),
+                Username SERIAL,
                 Status VARCHAR(255) NOT NULL,
                 Location POINT NOT NULL,
                 Plate VARCHAR(10),
@@ -66,7 +66,7 @@ class DB():
                 Color VARCHAR(10) NOT NULL,
                 FOREIGN KEY (company_id) REFERENCES Company(company_id) ON UPDATE CASCADE ON DELETE CASCADE,
                 FOREIGN KEY (UID) REFERENCES Station(uid) ON UPDATE CASCADE ON DELETE CASCADE,
-                FOREIGN KEY (Username) REFERENCES Customer(username)
+                FOREIGN KEY (Username) REFERENCES Customer(username) ON UPDATE CASCADE ON DELETE CASCADE
             )
             """,
             """
@@ -94,7 +94,7 @@ class DB():
             """
             CREATE TABLE History_of_trip (
                 Identification_num SERIAL,
-                Username VARCHAR(30),
+                Username SERIAL,
                 starting_loc POINT,
                 client_loc POINT,
                 final_loc POINT,
@@ -135,7 +135,7 @@ class DB():
 
         except (Exception, psycopg2.DatabaseError) as err:
             print(err)
-
+            pass
         finally:
             self.conn.close()
 
@@ -169,71 +169,79 @@ class DB():
             self.conn.commit()
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
+            pass
 
         finally:
             self.conn.close()
 
     def input_sample_data(self):
-        commands = ("""
-        INSERT INTO company (company_id, company_name) 
-        VALUES ( 1935-08-01,'Jane')
-        """,
+        commands = (""" INSERT INTO company (company_name) VALUES ('Aidar') """,
                     """
-                    INSERT INTO station (time_charging, location, price_of_charging, plug_formats, free_sockets, amount_of_sockets) 
-                    VALUES ('1:00', 'Kazan', '100', 'first', '5', '7'),
-                        ('3:00', 'Kazan', '300', 'first', '5', '7')
+                    INSERT INTO station (location, price_of_charging, plug_formats, free_sockets, amount_of_sockets, company_id)
+                    VALUES ('(25,25)', '100', 'all', '7', '7', '1'),
+                        ('(25,75)', '200', 'all', '7', '7', '1'),
+                        ('(75,25)', '100', 'all', '7', '7', '1'),
+                        ('(75,75)', '200', 'all', '7', '7', '1')
                     """,
                     """
-                    INSERT INTO workshops (location, available_car_p, available_time, company_id) 
-                    VALUES ('Kazan', 'some1', '100', '1'),
-                        ('Kazan', 'some2', '200', '2')
+                    INSERT INTO workshops (location, available_car_p, available_time, company_id)
+                    VALUES
+                        ('(26,26)', 'some1', '8-20', '1'),
+                        ('(26,76)', 'some2', '8-20', '1'),
+                        ('(76,26)', 'some3', '8-20', '1'),
+                        ('(76,76)', 'some4', '8-20', '1')
                     """,
                     """
-                    INSERT INTO provider (phone_num, address, name) 
+                    INSERT INTO provider (phone_num, address, name)
                     VALUES ('977722677', 'Kazan', 'YaSuperProvider'),
-                        ('977722678', 'Kazan', 'YaSuperProvider')
+                        ('977722678', 'Chelny', 'YaSuperProvider2')
                     """,
                     """
-                    INSERT INTO car (model, uid, status, location, company_id) 
-                    VALUES ('CH11', '1', 'used', 'Kazan', '1'),
-                        ('CH12', '2', 'used', 'Kazan', '1'),
-                        ('CH13', '3', 'used', 'Kazan', '2')
+                    INSERT INTO customer (email, phone_number, location, full_name)
+                    VALUES('hernya@mail.ru', '8777345621', '(231,129)', 'Cool Per'),
+                    ('hernya2@mail.ru', '8777345622', '(179,35)', 'Cool Por')
                     """,
                     """
-                    INSERT INTO customer (email, phone_number, location, full_name) 
-                    VALUES ('hernya@mail.ru', '8777345621', 'Kazan', 'cool per'),
-                        ('hernya2@mail.ru', '8777345622', 'Kazan', 'cool por')
-                        """,
-                    """
-                    INSERT INTO history_of_providing (wid, pcompany_id, type_car_p) 
-                    VALUES ('1', '1', 'dich1'),
-                        ('1', '1', 'dich2')
-                    """,
-                    """
-                    INSERT INTO history_of_charging (identification_num, uid, starting_ch, ending_ch, price) 
-                    VALUES ('1', '1', '8:00', '18:00', '500')
-                    """,
-                    """
-                    INSERT INTO history_of_trip (identification_num, username, starting_loc, client_loc, final_loc) 
-                    VALUES ('1', '1', (1, 5), (3, 8), (8, 9))
-                    """,
-                    """
-                    INSERT INTO history_of_repairing (identification_num, wid, price, car_parts, date) 
-                    VALUES ('1', '1', '500', 'dich1', '2018.11.11')
-                    """,
-                    )
+                    INSERT INTO car (model, status, location, plate, color, company_id)
+                    VALUES ('CH11', 'used', '(123,43)', 'AN10200CS', 'red', '1'),
+                        ('CH12', 'used', '(56,74)', 'AN10200CS', 'red', '1')
+                    """)
+
+                    # """
+                    # INSERT INTO history_of_providing (wid, pcompany_id, type_car_p)
+                    # VALUES ('1', '1', 'dich1'),
+                    #     ('1', '1', 'dich2')
+                    # """,
+                    # """
+                    # INSERT INTO history_of_charging (identification_num, uid, starting_ch, ending_ch, price)
+                    # VALUES ('1', '1', '8:00', '18:00', '500')
+                    # """,
+                    # """
+                    # INSERT INTO history_of_trip (identification_num, username, starting_loc, client_loc, final_loc)
+                    # VALUES ('1', '1', (1, 5), (3, 8), (8, 9))
+                    # """,
+                    # """
+                    # INSERT INTO history_of_repairing (identification_num, wid, price, car_parts, date)
+                    # VALUES ('1', '1', '500', 'dich1', '2018.11.11')
+                    # """,
+
         try:
+            self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
+
             cur = self.conn.cursor()
 
-            '''''for command in commands2:
-                cur.execute(command)'''''
-            cur.execute(commands)
+            for command in commands:
+                cur.execute(command)
 
             cur.close()
 
             self.conn.commit()
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
+            pass
+
+        finally:
+            self.conn.close()
 
     class select_queries():
         def query_1(self, username):
@@ -423,3 +431,5 @@ class DB():
 
 if __name__ == '__main__':
     db = DB()
+    # db.delete_tables()
+    db.input_sample_data()
