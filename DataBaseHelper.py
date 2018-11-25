@@ -22,7 +22,7 @@ class DB():
                 Plug_formats VARCHAR(255) NOT NULL,
                 Free_sockets INTEGER NOT NULL,
                 Amount_of_sockets INTEGER NOT NULL,
-                company_id SERIAL REFERENCES Company(Company_id) ON UPDATE CASCADE ON DELETE CASCADE
+                company_id SERIAL REFERENCES Company(company_id) ON UPDATE CASCADE ON DELETE CASCADE
             )
             """,
             """
@@ -32,7 +32,7 @@ class DB():
                 Available_car_p VARCHAR(255) NOT NULL,
                 Available_time VARCHAR(255) NOT NULL,
                 company_id SERIAL NOT NULL,
-                FOREIGN KEY (company_id) REFERENCES Company(Company_id) ON UPDATE CASCADE ON DELETE CASCADE
+                FOREIGN KEY (company_id) REFERENCES Company(company_id) ON UPDATE CASCADE ON DELETE CASCADE
             )
             """,
             """
@@ -41,20 +41,6 @@ class DB():
                 Phone_num VARCHAR(10) NOT NULL,
                 Address VARCHAR(255) NOT NULL,
                 Name VARCHAR(30) NOT NULL
-            )
-            """,
-            """
-            CREATE TABLE Car (
-                Identification_num SERIAL PRIMARY KEY,
-                Model VARCHAR(255) NOT NULL,
-                UID SERIAL,
-                Status VARCHAR(255) NOT NULL,
-                Location POINT NOT NULL,
-                Plate VARCHAR(10),
-                company_id SERIAL NOT NULL,
-                Color VARCHAR(10) NOT NULL,
-                FOREIGN KEY (company_id) REFERENCES Company(Company_id) ON UPDATE CASCADE ON DELETE CASCADE,
-                FOREIGN KEY (UID) REFERENCES Station(UID) ON UPDATE CASCADE ON DELETE CASCADE
             )
             """,
             """
@@ -68,12 +54,28 @@ class DB():
     
             """,
             """
+            CREATE TABLE Car (
+                Identification_num SERIAL PRIMARY KEY,
+                Model VARCHAR(255) NOT NULL,
+                UID SERIAL,
+                Username VARCHAR(30),
+                Status VARCHAR(255) NOT NULL,
+                Location POINT NOT NULL,
+                Plate VARCHAR(10),
+                company_id SERIAL NOT NULL,
+                Color VARCHAR(10) NOT NULL,
+                FOREIGN KEY (company_id) REFERENCES Company(company_id) ON UPDATE CASCADE ON DELETE CASCADE,
+                FOREIGN KEY (UID) REFERENCES Station(uid) ON UPDATE CASCADE ON DELETE CASCADE,
+                FOREIGN KEY (Username) REFERENCES Customer(username)
+            )
+            """,
+            """
             CREATE TABLE History_of_providing (
                 WID SERIAL,
                 PCompany_id SERIAL,
                 Type_car_p VARCHAR(40), 
-                FOREIGN KEY (PCompany_id) REFERENCES Provider(PCompany_id) ON UPDATE CASCADE ON DELETE CASCADE,
-                FOREIGN KEY (WID) REFERENCES Workshops(WID) ON UPDATE CASCADE ON DELETE CASCADE,
+                FOREIGN KEY (PCompany_id) REFERENCES Provider(pcompany_id) ON UPDATE CASCADE ON DELETE CASCADE,
+                FOREIGN KEY (WID) REFERENCES Workshops(wid) ON UPDATE CASCADE ON DELETE CASCADE,
                 PRIMARY KEY(WID,PCompany_id)
             )
             """,
@@ -84,8 +86,8 @@ class DB():
                 starting_ch TIME,
                 ending_ch TIME,
                 price DOUBLE PRECISION,
-                FOREIGN KEY (Identification_num) REFERENCES Car(Identification_num) ON UPDATE CASCADE ON DELETE CASCADE,
-                FOREIGN KEY (UID) REFERENCES Station(UID) ON UPDATE CASCADE ON DELETE CASCADE,
+                FOREIGN KEY (Identification_num) REFERENCES Car(identification_num) ON UPDATE CASCADE ON DELETE CASCADE,
+                FOREIGN KEY (UID) REFERENCES Station(uid) ON UPDATE CASCADE ON DELETE CASCADE,
                 PRIMARY KEY(UID,Identification_num)
             )
             """,
@@ -97,8 +99,10 @@ class DB():
                 client_loc POINT,
                 final_loc POINT,
                 date DATE,
-                FOREIGN KEY (Identification_num) REFERENCES Car(Identification_num) ON UPDATE CASCADE ON DELETE CASCADE,
-                FOREIGN KEY (Username) REFERENCES Customer(Username) ON UPDATE CASCADE ON DELETE CASCADE,
+                starting_tr TIME,
+                ending_tr TIME,
+                FOREIGN KEY (Identification_num) REFERENCES Car(identification_num) ON UPDATE CASCADE ON DELETE CASCADE,
+                FOREIGN KEY (Username) REFERENCES Customer(username) ON UPDATE CASCADE ON DELETE CASCADE,
                 PRIMARY KEY(Username,Identification_num)
             )
             """,
@@ -110,8 +114,8 @@ class DB():
                 Car_parts VARCHAR(40),
                 date DATE,
                 PRIMARY KEY (WID,Identification_num),
-                FOREIGN KEY (Identification_num) REFERENCES Car(Identification_num) ON UPDATE CASCADE ON DELETE CASCADE,
-                FOREIGN KEY (WID) REFERENCES Workshops(WID) ON UPDATE CASCADE ON DELETE CASCADE
+                FOREIGN KEY (Identification_num) REFERENCES Car(identification_num) ON UPDATE CASCADE ON DELETE CASCADE,
+                FOREIGN KEY (WID) REFERENCES Workshops(wid) ON UPDATE CASCADE ON DELETE CASCADE
             )
             """
 
@@ -129,8 +133,8 @@ class DB():
 
             self.conn.commit()
 
-        except (Exception, psycopg2.DatabaseError):
-            pass
+        except (Exception, psycopg2.DatabaseError) as err:
+            print(err)
 
         finally:
             self.conn.close()
@@ -282,8 +286,8 @@ class DB():
                 for j in time_arr:
                     query = """SELECT COUNT(identification_num) 
                                      FROM history_of_trip 
-                                     WHERE starting_ch<""" + date + str(j[0]) + """ and 
-                                     ending_ch>""" + date + str(j[1])
+                                     WHERE starting_tr<""" + date + str(j[0]) + """ and 
+                                     ending_tr>""" + date + str(j[1])
                     average_amount[j][i] = cur.execute(query) / car_amount
 
             morning = average_amount[0].sum() / 7
@@ -431,7 +435,6 @@ class DB():
             evening = average_amount[2].sum() / 7
 
             self.conn.close()
-
 
 if __name__ == '__main__':
     db = DB()
