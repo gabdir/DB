@@ -57,16 +57,12 @@ class DB():
             CREATE TABLE Car (
                 Identification_num SERIAL PRIMARY KEY,
                 Model VARCHAR(255) NOT NULL,
-                UID SERIAL,
-                Username SERIAL,
                 Status VARCHAR(255) NOT NULL,
                 Location POINT NOT NULL,
                 Plate VARCHAR(10),
                 company_id SERIAL NOT NULL,
                 Color VARCHAR(10) NOT NULL,
-                FOREIGN KEY (company_id) REFERENCES Company(company_id) ON UPDATE CASCADE ON DELETE CASCADE,
-                FOREIGN KEY (UID) REFERENCES Station(uid) ON UPDATE CASCADE ON DELETE CASCADE,
-                FOREIGN KEY (Username) REFERENCES Customer(username) ON UPDATE CASCADE ON DELETE CASCADE
+                FOREIGN KEY (company_id) REFERENCES Company(company_id) ON UPDATE CASCADE ON DELETE CASCADE
             )
             """,
             """
@@ -205,25 +201,27 @@ class DB():
                     INSERT INTO car (model, status, location, plate, color, company_id)
                     VALUES ('CH11', 'used', '(123,43)', 'AN10200CS', 'red', '1'),
                         ('CH12', 'used', '(56,74)', 'AN10200CS', 'red', '1')
-                    """)
+                    """,
 
-                    # """
-                    # INSERT INTO history_of_providing (wid, pcompany_id, type_car_p)
-                    # VALUES ('1', '1', 'dich1'),
-                    #     ('1', '1', 'dich2')
-                    # """,
-                    # """
-                    # INSERT INTO history_of_charging (identification_num, uid, starting_ch, ending_ch, price)
-                    # VALUES ('1', '1', '8:00', '18:00', '500')
-                    # """,
-                    # """
-                    # INSERT INTO history_of_trip (identification_num, username, starting_loc, client_loc, final_loc)
-                    # VALUES ('1', '1', (1, 5), (3, 8), (8, 9))
-                    # """,
-                    # """
-                    # INSERT INTO history_of_repairing (identification_num, wid, price, car_parts, date)
-                    # VALUES ('1', '1', '500', 'dich1', '2018.11.11')
-                    # """,
+                    """
+                    INSERT INTO history_of_providing (wid, pcompany_id, type_car_p)
+                    VALUES ('2', '1', 'dich1'),
+                        ('3', '2', 'dich2')
+                    """,
+                    """
+                    INSERT INTO history_of_charging (identification_num, uid, starting_ch, ending_ch, price)
+                    VALUES ('1', '2', '8:00', '9:00', 500),
+                     ('2', '3', '10:00', '10:10', 300)
+                    """,
+                    """
+                    INSERT INTO history_of_trip (identification_num, username, starting_loc, client_loc, final_loc)
+                    VALUES ('1', '1', '(3,10)', '(7, 13)', '(2, 4)'),
+                    ('2', '2', '(1, 5)', '(3, 8)', '(8, 9)')
+                    """,
+                    """
+                    INSERT INTO history_of_repairing (identification_num, wid, price, car_parts, date)
+                    VALUES ('1', '2', 500, 'dich1', '2018.11.11')
+                    """)
 
         try:
             self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
@@ -267,9 +265,9 @@ class DB():
 
         def query_2(self, date):
             for i in range(24):
-                query ="""SELECT COUNT(identification_num) 
-                          FROM history_of_charging 
-                          WHERE starting_ch<""" + date + str(i + 1) + """ and 
+                query ="""SELECT COUNT(identification_num)
+                          FROM history_of_charging
+                          WHERE starting_ch<""" + date + str(i + 1) + """ and
                           ending_ch>""" + date + str(i)
                 try:
                     self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
@@ -292,9 +290,9 @@ class DB():
             average_amount = [3][7]
             for i in range(7):
                 for j in time_arr:
-                    query = """SELECT COUNT(identification_num) 
-                                     FROM history_of_trip 
-                                     WHERE starting_tr<""" + date + str(j[0]) + """ and 
+                    query = """SELECT COUNT(identification_num)
+                                     FROM history_of_trip
+                                     WHERE starting_tr<""" + date + str(j[0]) + """ and
                                      ending_tr>""" + date + str(j[1])
                     average_amount[j][i] = cur.execute(query) / car_amount
 
@@ -308,8 +306,8 @@ class DB():
             self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
             cur = self.conn.cursor()
 
-            usr = cur.execute("""SELECT username FROM history_of_trip WHERE 
-                                identification_num = 
+            usr = cur.execute("""SELECT username FROM history_of_trip WHERE
+                                identification_num =
                                 (SELECT identification_num FROM history_of_charging HAVING count(*)>1)""")
 
             if usr != None and usr == username:
@@ -337,9 +335,9 @@ class DB():
             car_amount = cur.execute("""SELECT COUNT(client_loc), client_loc FROM history_of_trip""")
             average_amount = [3]
             for j in time_arr:
-                query = """SELECT COUNT(client_loc), client_loc 
+                query = """SELECT COUNT(client_loc), client_loc
                     FROM history_of_trip
-                    WHERE starting_tr<""" + date + str(j[0]) + """ and 
+                    WHERE starting_tr<""" + date + str(j[0]) + """ and
                     ending_tr>""" + date + str(j[1])
                 average_amount[j] = cur.execute(query).sort();
 
@@ -357,9 +355,9 @@ class DB():
             average_amount = [3][7]
             for i in range(7):
                 for j in time_arr:
-                    query = """SELECT COUNT(identification_num) 
-                                     FROM history_of_trip 
-                                     WHERE starting_ch<""" + date + str(j[0]) + """ and 
+                    query = """SELECT COUNT(identification_num)
+                                     FROM history_of_trip
+                                     WHERE starting_ch<""" + date + str(j[0]) + """ and
                                      ending_ch>""" + date + str(j[1])
                     average_amount[j][i] = cur.execute(query) / car_amount
 
@@ -377,9 +375,9 @@ class DB():
             average_amount = [3][7]
             for i in range(7):
                 for j in time_arr:
-                    query = """SELECT COUNT(identification_num) 
-                                     FROM history_of_trip 
-                                     WHERE starting_ch<""" + date + str(j[0]) + """ and 
+                    query = """SELECT COUNT(identification_num)
+                                     FROM history_of_trip
+                                     WHERE starting_ch<""" + date + str(j[0]) + """ and
                                      ending_ch>""" + date + str(j[1])
                     average_amount[j][i] = cur.execute(query) / car_amount
 
@@ -397,9 +395,9 @@ class DB():
             average_amount = [3][7]
             for i in range(7):
                 for j in time_arr:
-                    query = """SELECT COUNT(identification_num) 
-                                     FROM history_of_trip 
-                                     WHERE starting_ch<""" + date + str(j[0]) + """ and 
+                    query = """SELECT COUNT(identification_num)
+                                     FROM history_of_trip
+                                     WHERE starting_ch<""" + date + str(j[0]) + """ and
                                      ending_ch>""" + date + str(j[1])
                     average_amount[j][i] = cur.execute(query) / car_amount
 
@@ -417,9 +415,9 @@ class DB():
             average_amount = [3][7]
             for i in range(7):
                 for j in time_arr:
-                    query = """SELECT COUNT(identification_num) 
-                                     FROM history_of_trip 
-                                     WHERE starting_ch<""" + date + str(j[0]) + """ and 
+                    query = """SELECT COUNT(identification_num)
+                                     FROM history_of_trip
+                                     WHERE starting_ch<""" + date + str(j[0]) + """ and
                                      ending_ch>""" + date + str(j[1])
                     average_amount[j][i] = cur.execute(query) / car_amount
 
@@ -431,5 +429,5 @@ class DB():
 
 if __name__ == '__main__':
     db = DB()
-    # db.delete_tables()
-    db.input_sample_data()
+    db.delete_tables()
+    # db.input_sample_data()
