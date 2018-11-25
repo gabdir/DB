@@ -275,20 +275,160 @@ class DB():
         def query_3(self, date):
             self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
             cur = self.conn.cursor()
-            time_arr = [[7,10],[12,14],[17,19]]
+            time_arr = [[7, 10], [12, 14], [17, 19]]
             car_amount = cur.execute("""SELECT COUNT(identification_num) FROM Car""")
             average_amount = [3][7]
             for i in range(7):
                 for j in time_arr:
-                    query ="""SELECT COUNT(identification_num) 
-                              FROM history_of_trip 
-                              WHERE starting_ch<""" + date + str(j[0]) + """ and 
-                              ending_ch>""" + date + str(j[1])
-                    average_amount[j][i] = cur.execute(query)/car_amount
+                    query = """SELECT COUNT(identification_num) 
+                                     FROM history_of_trip 
+                                     WHERE starting_ch<""" + date + str(j[0]) + """ and 
+                                     ending_ch>""" + date + str(j[1])
+                    average_amount[j][i] = cur.execute(query) / car_amount
 
-            morning = average_amount[0].sum()
-            afternoon = average_amount[1].sum()
-            evening = average_amount[2].sum()
+            morning = average_amount[0].sum() / 7
+            afternoon = average_amount[1].sum() / 7
+            evening = average_amount[2].sum() / 7
+
+            self.conn.close()
+
+        def query_4(self, date):
+            self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
+            cur = self.conn.cursor()
+            time_arr = [[7, 10], [12, 14], [17, 19]]
+            car_amount = cur.execute("""SELECT COUNT(identification_num) FROM Car""")
+            average_amount = [3][7]
+            for i in range(7):
+                for j in time_arr:
+                    query = """SELECT COUNT(identification_num) 
+                                     FROM history_of_trip 
+                                     WHERE starting_ch<""" + date + str(j[0]) + """ and 
+                                     ending_ch>""" + date + str(j[1])
+                    average_amount[j][i] = cur.execute(query) / car_amount
+
+            morning = average_amount[0].sum() / 7
+            afternoon = average_amount[1].sum() / 7
+            evening = average_amount[2].sum() / 7
+
+            self.conn.close()
+
+        def query_5(self, date):
+            self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
+            cur = self.conn.cursor()
+            time_arr = [[7, 10], [12, 14], [17, 19]]
+            car_amount = cur.execute("""SELECT COUNT(identification_num) FROM Car""")
+            average_amount = [3][7]
+            for i in range(7):
+                for j in time_arr:
+                    query = """SELECT COUNT(identification_num) 
+                                     FROM history_of_trip 
+                                     WHERE starting_ch<""" + date + str(j[0]) + """ and 
+                                     ending_ch>""" + date + str(j[1])
+                    average_amount[j][i] = cur.execute(query) / car_amount
+
+            morning = average_amount[0].sum() / 7
+            afternoon = average_amount[1].sum() / 7
+            evening = average_amount[2].sum() / 7
+
+            self.conn.close()
+
+        def query_6(self, date):
+            self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
+            cur = self.conn.cursor()
+            time_arr = [[7, 10], [12, 14], [17, 19]]
+            car_amount = cur.execute("""SELECT COUNT(identification_num) FROM Car""")
+            average_amount = [3][7]
+            for i in range(7):
+                for j in time_arr:
+                    query = """SELECT COUNT(identification_num) 
+                                     FROM history_of_trip 
+                                     WHERE starting_ch<""" + date + str(j[0]) + """ and 
+                                     ending_ch>""" + date + str(j[1])
+                    average_amount[j][i] = cur.execute(query) / car_amount
+
+            morning = average_amount[0].sum() / 7
+            afternoon = average_amount[1].sum() / 7
+            evening = average_amount[2].sum() / 7
+
+            self.conn.close()
+
+        def query_7(self, date):
+            self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
+            cur = self.conn.cursor()
+            time_arr = [[7, 10], [12, 14], [17, 19]]
+            car_amount = cur.execute("""SELECT COUNT(identification_num) FROM Car""")
+            average_amount = [3][7]
+            for i in range(7):
+                for j in time_arr:
+                    query = """SELECT COUNT(identification_num) 
+                                     FROM history_of_trip 
+                                     WHERE starting_ch<""" + date + str(j[0]) + """ and 
+                                     ending_ch>""" + date + str(j[1])
+                    average_amount[j][i] = cur.execute(query) / car_amount
+
+            morning = average_amount[0].sum() / 7
+            afternoon = average_amount[1].sum() / 7
+            evening = average_amount[2].sum() / 7
+
+            self.conn.close()
+
+        def query_8(self, date):
+            self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
+            cur = self.conn.cursor()
+            time_arr = [[7, 10], [12, 14], [17, 19]]
+            car_amount = cur.execute("""SELECT COUNT(identification_num) FROM Car""")
+            average_amount = [3][7]
+            for i in range(7):
+                for j in time_arr:
+                    query = """SELECT COUNT(identification_num) 
+                                     FROM history_of_trip 
+                                     WHERE starting_ch<""" + date + str(j[0]) + """ and 
+                                     ending_ch>""" + date + str(j[1])
+                    average_amount[j][i] = cur.execute(query) / car_amount
+
+            morning = average_amount[0].sum() / 7
+            afternoon = average_amount[1].sum() / 7
+            evening = average_amount[2].sum() / 7
+
+            self.conn.close()
+
+        def query_9(self, date):
+            self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
+            cur = self.conn.cursor()
+            time_arr = [[7, 10], [12, 14], [17, 19]]
+            car_amount = cur.execute("""SELECT COUNT(identification_num) FROM Car""")
+            average_amount = [3][7]
+            for i in range(7):
+                for j in time_arr:
+                    query = """SELECT COUNT(identification_num) 
+                                     FROM history_of_trip 
+                                     WHERE starting_ch<""" + date + str(j[0]) + """ and 
+                                     ending_ch>""" + date + str(j[1])
+                    average_amount[j][i] = cur.execute(query) / car_amount
+
+            morning = average_amount[0].sum() / 7
+            afternoon = average_amount[1].sum() / 7
+            evening = average_amount[2].sum() / 7
+
+            self.conn.close()
+
+        def query_10(self, date):
+            self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
+            cur = self.conn.cursor()
+            time_arr = [[7, 10], [12, 14], [17, 19]]
+            car_amount = cur.execute("""SELECT COUNT(identification_num) FROM Car""")
+            average_amount = [3][7]
+            for i in range(7):
+                for j in time_arr:
+                    query = """SELECT COUNT(identification_num) 
+                                     FROM history_of_trip 
+                                     WHERE starting_ch<""" + date + str(j[0]) + """ and 
+                                     ending_ch>""" + date + str(j[1])
+                    average_amount[j][i] = cur.execute(query) / car_amount
+
+            morning = average_amount[0].sum() / 7
+            afternoon = average_amount[1].sum() / 7
+            evening = average_amount[2].sum() / 7
 
             self.conn.close()
 
