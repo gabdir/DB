@@ -68,24 +68,24 @@ class DB():
             """,
             """
             CREATE TABLE History_of_providing (
+                providing_id SERIAL PRIMARY KEY,
                 WID SERIAL,
                 PCompany_id SERIAL,
                 Type_car_p VARCHAR(40), 
                 FOREIGN KEY (PCompany_id) REFERENCES Provider(pcompany_id) ON UPDATE CASCADE ON DELETE CASCADE,
-                FOREIGN KEY (WID) REFERENCES Workshops(wid) ON UPDATE CASCADE ON DELETE CASCADE,
-                PRIMARY KEY(WID,PCompany_id)
+                FOREIGN KEY (WID) REFERENCES Workshops(wid) ON UPDATE CASCADE ON DELETE CASCADE
             )
             """,
             """
             CREATE TABLE History_of_charging (
+                charging_id SERIAL PRIMARY KEY,
                 Identification_num SERIAL,
                 UID SERIAL,
                 starting_ch TIME,
                 ending_ch TIME,
                 date DATE,
                 FOREIGN KEY (Identification_num) REFERENCES Car(identification_num) ON UPDATE CASCADE ON DELETE CASCADE,
-                FOREIGN KEY (UID) REFERENCES Station(uid) ON UPDATE CASCADE ON DELETE CASCADE,
-                PRIMARY KEY(UID,Identification_num)
+                FOREIGN KEY (UID) REFERENCES Station(uid) ON UPDATE CASCADE ON DELETE CASCADE
             )
             """,
             """
@@ -107,17 +107,16 @@ class DB():
             """,
             """
             CREATE TABLE History_of_repairing(
+                repairing_id SERIAL PRIMARY KEY,
                 Identification_num SERIAL,
                 WID SERIAL,
                 price DOUBLE PRECISION,
                 Car_parts VARCHAR(40),
                 date DATE,
-                PRIMARY KEY (WID,Identification_num),
                 FOREIGN KEY (Identification_num) REFERENCES Car(identification_num) ON UPDATE CASCADE ON DELETE CASCADE,
                 FOREIGN KEY (WID) REFERENCES Workshops(wid) ON UPDATE CASCADE ON DELETE CASCADE
             )
             """
-
 
         )
         try:
@@ -284,9 +283,10 @@ class DB():
         time = datetime.datetime.strptime(date, "%Y-%m-%d")
         time2 = datetime.datetime.strptime(date, "%Y-%m-%d") + datetime.timedelta(hours=1)
         for i in range(24):
-            query ="""SELECT COUNT(identification_num)
+            query = """SELECT COUNT(identification_num)
                       FROM history_of_charging
-                      WHERE date = '""" + date + """' and starting_ch < '""" + str(time2).split(" ")[1] + """' and ending_ch > '""" + str(time).split(" ")[1] + """'"""
+                      WHERE date = '""" + date + """' and starting_ch < '""" + str(time2).split(" ")[
+                1] + """' and ending_ch > '""" + str(time).split(" ")[1] + """'"""
 
             time = time + datetime.timedelta(hours=1)
             time2 = time2 + datetime.timedelta(hours=1)
@@ -305,6 +305,7 @@ class DB():
             finally:
                 self.conn.close()
         #
+
     def query_3(self, date):
         time = datetime.datetime.strptime(date, "%Y-%m-%d")
         self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
@@ -322,23 +323,19 @@ class DB():
                     ending_tr>'""" + str(j[0]) + """:00:00'"""
                 time = time + datetime.timedelta(days=1)
                 cur.execute(query)
-                average_amount[k].append(cur.fetchall()[0][0]/car_amount)
+                average_amount[k].append(cur.fetchall()[0][0] / car_amount)
                 k += 1
 
             k = 0
-
 
         morning = sum(average_amount[0]) / 7
         afternoon = sum(average_amount[1]) / 7
         evening = sum(average_amount[2]) / 7
 
-
         print(morning, afternoon, evening)
         self.conn.close()
 
-
-
-    def query_4(self,username):
+    def query_4(self, username):
         date = datetime.datetime.now() - datetime.timedelta(days=30)
         self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
         cur = self.conn.cursor()
@@ -359,7 +356,6 @@ class DB():
             print(False)
             pass
 
-
         self.conn.close()
 
     def query_5(self, date):
@@ -370,7 +366,7 @@ class DB():
         cur.execute("""SELECT COUNT(identification_num) FROM Car""")
         car_amount = cur.fetchall()[0][0]
 
-        query1 ="""SELECT starting_loc <-> client_loc FROM history_of_trip WHERE date='""" + str(date_cur) + """'"""
+        query1 = """SELECT starting_loc <-> client_loc FROM history_of_trip WHERE date='""" + str(date_cur) + """'"""
 
         cur.execute(query1)
         list1 = cur.fetchall()
@@ -378,8 +374,8 @@ class DB():
         distance = []
         for i in range(len(list1)):
             distance.append(list1[i][0])
-        #average_distance
-        print(sum(distance)/len(list1))
+        # average_distance
+        print(sum(distance) / len(list1))
 
         query2 = """SELECT ending_tr-starting_tr FROM history_of_trip WHERE date='""" + str(date_cur) + """'"""
         cur.execute(query2)
@@ -392,7 +388,7 @@ class DB():
             summ += time[-1]
 
         summ = summ / len(time)
-        #average_time
+        # average_time
         print(summ)
         # average_time
         self.conn.close()
@@ -464,25 +460,31 @@ class DB():
 
         self.conn.close()
 
-        # def query_9(self, date):
-        #     self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
-        #     cur = self.conn.cursor()
-        #     time_arr = [[7, 10], [12, 14], [17, 19]]
-        #     car_amount = cur.execute("""SELECT COUNT(identification_num) FROM Car""")
-        #     average_amount = [3][7]
-        #     for i in range(7):
-        #         for j in time_arr:
-        #             query = """SELECT COUNT(identification_num)
-        #                              FROM history_of_trip
-        #                              WHERE starting_ch<""" + date + str(j[0]) + """ and
-        #                              ending_ch>""" + date + str(j[1])
-        #             average_amount[j][i] = cur.execute(query) / car_amount
-        #
-        #     morning = average_amount[0].sum() / 7
-        #     afternoon = average_amount[1].sum() / 7
-        #     evening = average_amount[2].sum() / 7
-        #
-        #     self.conn.close()
+    def query_9(self, date):
+        time = datetime.datetime.strptime(date, "%Y-%m-%d") - datetime.timedelta(weeks=5)
+        self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
+        cur = self.conn.cursor()
+        car_parts = dict()
+        arr = []
+        for i in range(5):
+            query = """SELECT (COUNT(car_parts), car_parts)
+            FROM history_of_repairing
+            WHERE date>'""" + str(time).split(" ")[0] + """' 
+            and date <'""" + str(time + datetime.timedelta(weeks=1)).split(" ")[0] + """' GROUP BY car_parts"""
+            cur.execute(query)
+            arr = cur.fetchall()
+            for i in arr:
+                arr2 = i[0].replace("(", "").replace(")", "").split(",")
+                if car_parts.__contains__(arr2[1]):
+                    car_parts[arr2[1]] += int(arr2[0])
+                else:
+                    car_parts[arr2[1]] = int(arr2[0])
+                time = time + datetime.timedelta(weeks=1)
+
+        for i in car_parts:
+            car_parts[i] = car_parts[i] / 5
+        print(car_parts)
+        self.conn.close()
         #
         # def query_10(self, date):
         #     self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
@@ -509,8 +511,12 @@ if __name__ == '__main__':
     db = DB()
     # db.delete_tables()
     # db.input_sample_data()
-    db.query_4(2)
-
-    #db.query_7('2018-11-24')
-    db.query_7("2018-11-26")
+    db.query_9("2018-11-15")
+    # db.query_8()
+    # db.query_7()
+    # db.query_6()
+    # db.query_5()
+    # db.query_4(2)
+    # db.query_3('2018-11-24')
+    # db.query_2("2018-11-26")
     # db.query_1(2)
