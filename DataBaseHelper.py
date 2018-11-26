@@ -423,47 +423,40 @@ class DB():
                 print(None)
 
         self.conn.close()
-        #
-        # def query_7(self, date):
-        #     self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
-        #     cur = self.conn.cursor()
-        #     time_arr = [[7, 10], [12, 14], [17, 19]]
-        #     car_amount = cur.execute("""SELECT COUNT(identification_num) FROM Car""")
-        #     average_amount = [3][7]
-        #     for i in range(7):
-        #         for j in time_arr:
-        #             query = """SELECT COUNT(identification_num)
-        #                              FROM history_of_trip
-        #                              WHERE starting_ch<""" + date + str(j[0]) + """ and
-        #                              ending_ch>""" + date + str(j[1])
-        #             average_amount[j][i] = cur.execute(query) / car_amount
-        #
-        #     morning = average_amount[0].sum() / 7
-        #     afternoon = average_amount[1].sum() / 7
-        #     evening = average_amount[2].sum() / 7
-        #
-        #     self.conn.close()
-        #
-        # def query_8(self, date):
-        #     self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
-        #     cur = self.conn.cursor()
-        #     time_arr = [[7, 10], [12, 14], [17, 19]]
-        #     car_amount = cur.execute("""SELECT COUNT(identification_num) FROM Car""")
-        #     average_amount = [3][7]
-        #     for i in range(7):
-        #         for j in time_arr:
-        #             query = """SELECT COUNT(identification_num)
-        #                              FROM history_of_trip
-        #                              WHERE starting_ch<""" + date + str(j[0]) + """ and
-        #                              ending_ch>""" + date + str(j[1])
-        #             average_amount[j][i] = cur.execute(query) / car_amount
-        #
-        #     morning = average_amount[0].sum() / 7
-        #     afternoon = average_amount[1].sum() / 7
-        #     evening = average_amount[2].sum() / 7
-        #
-        #     self.conn.close()
-        #
+
+        def query_7(self, date):
+            self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
+            cur = self.conn.cursor()
+            time_arr = [[7, 10], [12, 14], [17, 19]]
+            car_amount = cur.execute("""SELECT COUNT(identification_num) FROM Car""")
+            average_amount = [3][7]
+            for i in range(7):
+                for j in time_arr:
+                    query = """SELECT COUNT(identification_num)
+                                     FROM history_of_trip
+                                     WHERE starting_ch<""" + date + str(j[0]) + """ and
+                                     ending_ch>""" + date + str(j[1])
+                    average_amount[j][i] = cur.execute(query) / car_amount
+
+            morning = average_amount[0].sum() / 7
+            afternoon = average_amount[1].sum() / 7
+            evening = average_amount[2].sum() / 7
+
+            self.conn.close()
+    #some changes in query8, we are finding number of customers using the same stations
+    def query_8(self, date):
+
+        time = datetime.datetime.strptime(date, "%Y-%m-%d")
+        date_end = time - datetime.timedelta(days=30)
+        self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
+        cur = self.conn.cursor()
+        query = """SELECT COUNT(username)
+                   FROM history_of_charging NATURAL JOIN history_of_trip
+                   WHERE history_of_charging.date<'""" + str(time).split(" ")[0] + """' and history_of_charging.date>'""" + str(date_end).split(" ")[0] + """' 
+                   and starting_tr>starting_ch and ending_ch<ending_tr """
+
+        self.conn.close()
+
         # def query_9(self, date):
         #     self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
         #     cur = self.conn.cursor()
@@ -507,9 +500,11 @@ class DB():
 
 if __name__ == '__main__':
     db = DB()
-    # db.delete_tables()
+    db.delete_tables()
     # db.input_sample_data()
-    db.query_4(2)
+    # db.query_5('2018-11-26')
+    # db.query_4(2)
     # db.query_3('2018-11-24')
     # db.query_2("2018-11-26")
     # db.query_1(2)
+
