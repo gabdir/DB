@@ -81,7 +81,6 @@ class DB():
                 starting_ch TIME,
                 ending_ch TIME,
                 date DATE,
-                price DOUBLE PRECISION,
                 FOREIGN KEY (Identification_num) REFERENCES Car(identification_num) ON UPDATE CASCADE ON DELETE CASCADE,
                 FOREIGN KEY (UID) REFERENCES Station(uid) ON UPDATE CASCADE ON DELETE CASCADE,
                 PRIMARY KEY(UID,Identification_num)
@@ -89,6 +88,7 @@ class DB():
             """,
             """
             CREATE TABLE History_of_trip (
+                trip_id SERIAL PRIMARY KEY,
                 Identification_num SERIAL,
                 Username SERIAL,
                 starting_loc POINT,
@@ -97,9 +97,9 @@ class DB():
                 date DATE,
                 starting_tr TIME,
                 ending_tr TIME,
+                price DOUBLE PRECISION,
                 FOREIGN KEY (Identification_num) REFERENCES Car(identification_num) ON UPDATE CASCADE ON DELETE CASCADE,
-                FOREIGN KEY (Username) REFERENCES Customer(username) ON UPDATE CASCADE ON DELETE CASCADE,
-                PRIMARY KEY(Username,Identification_num)
+                FOREIGN KEY (Username) REFERENCES Customer(username) ON UPDATE CASCADE ON DELETE CASCADE
             )
             """,
             """
@@ -219,16 +219,16 @@ class DB():
                         ('3', '2', 'dich2')
                     """,
                     """
-                    INSERT INTO history_of_charging (identification_num, uid, starting_ch, ending_ch, date, price)
-                    VALUES ('1', '2', '8:00', '8:50', '2018-11-25', 500),
-                     ('2', '3', '10:00', '10:10', '2018-11-26', 300),
-                     ('3', '3', '11:00', '11:30', '2018-11-24',400)
+                    INSERT INTO history_of_charging (identification_num, uid, starting_ch, ending_ch, date)
+                    VALUES ('1', '2', '8:00', '8:50', '2018-11-25'),
+                     ('2', '3', '10:00', '10:10', '2018-11-26'),
+                     ('3', '3', '11:00', '11:30', '2018-11-24')
                     """,
                     """
-                    INSERT INTO history_of_trip (identification_num, username, starting_loc, client_loc, final_loc,date,starting_tr,ending_tr)
-                    VALUES ('1', '1', '(3,10)', '(7, 13)', '(2, 4)','2018.11.24','2018.11.24 9:00','2018.11.24 10:00'),
-                    ('2', '2', '(1, 5)', '(3, 8)', '(8, 9)','2018.11.26','2018.11.26 17:00','2018.11.26 19:00'),
-                    ('1', '2', '(6, 3)', '(5, 5)', '(10, 6)','2018.11.26','2018.11.26 15:00','2018.11.26 16:00')
+                    INSERT INTO history_of_trip (identification_num, username, starting_loc, client_loc, final_loc,date,starting_tr,ending_tr, price)
+                    VALUES ('1', '1', '(3,10)', '(7, 13)', '(2, 4)','2018.11.24','2018.11.24 9:00','2018.11.24 10:00', '200'),
+                    ('2', '2', '(1, 5)', '(3, 8)', '(8, 9)','2018.11.26','2018.11.26 17:00','2018.11.26 19:00', '300'),
+                    ('1', '2', '(6, 3)', '(5, 5)', '(10, 6)','2018.11.26','2018.11.26 15:00','2018.11.26 16:00', '400')
                     """,
                     """
                     INSERT INTO history_of_repairing (identification_num, wid, price, car_parts, date)
@@ -290,9 +290,8 @@ class DB():
                 self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
                 cur = self.conn.cursor()
                 cur.execute(query)
-                count = cur.fetchall()
-                for i in count:
-                    print(i)
+                count = cur.fetchall()[0][0]
+                print(count)
 
                 cur.close()
                 self.conn.commit()
@@ -336,11 +335,22 @@ class DB():
 
 
     def query_4(self,username):
+        date = datetime.datetime.now() - datetime.timedelta(days=30)
         self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
         cur = self.conn.cursor()
 
-        cur.execute("""SELECT identification_num FROM history_of_charging 
-                    """)
+        cur.execute("""select * from history_of_trip first
+        where date > '""" + str(date).split(" ")[0] + """'
+        and (select count(*) from history_of_trip second
+        where first.starting_tr = second.starting_tr 
+        and first.ending_tr = second.ending_tr 
+        and first.username = second.username 
+        and first.identification_num = second.identification_num 
+        and first.date = second.date 
+        and first.price = second.price) > 1""")
+
+        print(cur.fetchall()[0][0])
+
 
         self.conn.close()
         #
@@ -459,6 +469,7 @@ if __name__ == '__main__':
     db = DB()
     # db.delete_tables()
     # db.input_sample_data()
+    db.query_4(2)
     # db.query_3('2018-11-24')
-    db.query_2("2018-11-26")
+    # db.query_2("2018-11-26")
     # db.query_1(2)
