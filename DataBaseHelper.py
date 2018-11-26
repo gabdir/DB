@@ -98,6 +98,7 @@ class DB():
                 starting_tr TIME,
                 ending_tr TIME,
                 price DOUBLE PRECISION,
+                location VARCHAR(255),
                 FOREIGN KEY (Identification_num) REFERENCES Car(identification_num) ON UPDATE CASCADE ON DELETE CASCADE,
                 FOREIGN KEY (Username) REFERENCES Customer(username) ON UPDATE CASCADE ON DELETE CASCADE
             )
@@ -225,10 +226,11 @@ class DB():
                      ('3', '3', '11:00', '11:30', '2018-11-24')
                     """,
                     """
-                    INSERT INTO history_of_trip (identification_num, username, starting_loc, client_loc, final_loc,date,starting_tr,ending_tr, price)
-                    VALUES ('1', '1', '(3,10)', '(7, 13)', '(2, 4)','2018.11.24','2018.11.24 9:00','2018.11.24 10:00', '200'),
-                    ('2', '2', '(1, 5)', '(3, 8)', '(8, 9)','2018.11.26','2018.11.26 17:00','2018.11.26 19:00', '300'),
-                    ('1', '2', '(6, 3)', '(5, 5)', '(10, 6)','2018.11.26','2018.11.26 15:00','2018.11.26 16:00', '400')
+                    INSERT INTO history_of_trip (identification_num, username, starting_loc, client_loc, final_loc,date,starting_tr,ending_tr, price, location)
+                    VALUES 
+                    ('1', '1', '(3,10)', '(7, 13)', '(2, 4)','2018.11.24','2018.11.24 9:00','2018.11.24 10:00', '200', 'Kazan'),
+                    ('2', '2', '(1, 5)', '(3, 8)', '(8, 9)','2018.11.26','2018.11.26 17:00','2018.11.26 19:00', '300', 'Kazan'),
+                    ('1', '2', '(6, 3)', '(5, 5)', '(10, 6)','2018.11.26','2018.11.26 15:00','2018.11.26 16:00', '500', 'Chelny')
                     """,
                     """
                     INSERT INTO history_of_repairing (identification_num, wid, price, car_parts, date)
@@ -368,26 +370,39 @@ class DB():
         #
         #     #Дописать средние значения
         #     self.conn.close()
-        #
-        # def query_6(self, date):
-        #     self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
-        #     cur = self.conn.cursor()
-        #     time_arr = [[7, 10], [12, 14], [17, 19]]
-        #     car_amount = cur.execute("""SELECT COUNT(client_loc), client_loc FROM history_of_trip""")
-        #     average_amount = [3]
-        #     for j in time_arr:
-        #         query = """SELECT COUNT(client_loc), client_loc
-        #             FROM history_of_trip
-        #             WHERE starting_tr<""" + date + str(j[0]) + """ and
-        #             ending_tr>""" + date + str(j[1])
-        #         average_amount[j] = cur.execute(query).sort();
-        #
-        #     morning = average_amount[0][0]
-        #     afternoon = average_amount[1][0]
-        #     evening = average_amount[2][0]
-        #
-        #     self.conn.close()
-        #
+
+    def query_6(self, date):
+        time = datetime.datetime.strptime(date, "%Y-%m-%d")
+        self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
+        cur = self.conn.cursor()
+        time_arr = [[7, 10], [12, 14], [17, 19]]
+
+        average_amount = [[], [], []]
+        k = 0
+        for j in time_arr:
+            query = """SELECT COUNT(location), location
+                FROM history_of_trip
+                WHERE date = '""" + str(time).split(" ")[0] + """' and starting_tr<'""" + str(j[1]) + """:00:00' and
+                ending_tr>'""" + str(j[0]) + """:00:00' GROUP BY location"""
+            cur.execute(query)
+            arr = cur.fetchall()
+            try:
+                average_amount[k].append([arr[0][0], arr[0][1]])
+            except(IndexError):
+                pass
+            k += 1
+
+        for i in average_amount:
+            i.sort()
+            try:
+                print(i[0][1])
+            except(IndexError):
+                print(None)
+
+        self.conn.close()
+
+
+
         # def query_7(self, date):
         #     self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
         #     cur = self.conn.cursor()
@@ -473,7 +488,8 @@ if __name__ == '__main__':
     db = DB()
     # db.delete_tables()
     # db.input_sample_data()
-    db.query_4(2)
+    db.query_6("2018-11-26")
+    # db.query_4(2)
     # db.query_3('2018-11-24')
     # db.query_2("2018-11-26")
     # db.query_1(2)
