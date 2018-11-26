@@ -359,31 +359,54 @@ class DB():
 
 
         self.conn.close()
-        #
-        # def query_5(self, date):
-        #     self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
-        #     cur = self.conn.cursor()
-        #     query = """SELECT starting_loc, final_loc, starting_tr, ending_tr
-        #                 FROM history_of_trip
-        #                 WHERE starting_tr>""" + date
-        #     info = cur.execute(query)
-        #
-        #     #Дописать средние значения
-        #     self.conn.close()
+
+    def query_5(self, date):
+        date_cur = datetime.datetime.strptime(date, "%Y-%m-%d")
+        self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
+        cur = self.conn.cursor()
+
+        cur.execute("""SELECT COUNT(identification_num) FROM Car""")
+        car_amount = cur.fetchall()[0][0]
+
+        query1 ="""SELECT starting_loc <-> client_loc FROM history_of_trip WHERE date='""" + str(date_cur) + """'"""
+
+        cur.execute(query1)
+        list1 = cur.fetchall()
+
+        distance = []
+        for i in range(len(list1)):
+            distance.append(list1[i][0])
+        #average_distance
+        print(sum(distance)/len(list1))
+
+        query2 = """SELECT ending_tr-starting_tr FROM history_of_trip WHERE date='""" + str(date_cur) + """'"""
+        cur.execute(query2)
+        list2 = cur.fetchall()
+
+        time = []
+        summ = datetime.timedelta(0)
+        for i in range(len(list1)):
+            time.append(list2[i][0])
+            summ += time[-1]
+
+        summ = summ / len(time)
+        #average_time
+        print(summ)
+        # average_time
+        self.conn.close()
 
     def query_6(self, date):
         time = datetime.datetime.strptime(date, "%Y-%m-%d")
         self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
         cur = self.conn.cursor()
         time_arr = [[7, 10], [12, 14], [17, 19]]
-
         average_amount = [[], [], []]
         k = 0
         for j in time_arr:
             query = """SELECT COUNT(location), location
-                FROM history_of_trip
-                WHERE date = '""" + str(time).split(" ")[0] + """' and starting_tr<'""" + str(j[1]) + """:00:00' and
-                ending_tr>'""" + str(j[0]) + """:00:00' GROUP BY location"""
+            FROM history_of_trip
+            WHERE date = '""" + str(time).split(" ")[0] + """' and starting_tr<'""" + str(j[1]) + """:00:00' and
+            ending_tr>'""" + str(j[0]) + """:00:00' GROUP BY location"""
             cur.execute(query)
             arr = cur.fetchall()
             try:
@@ -400,9 +423,7 @@ class DB():
                 print(None)
 
         self.conn.close()
-
-
-
+        #
         # def query_7(self, date):
         #     self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
         #     cur = self.conn.cursor()
@@ -488,8 +509,7 @@ if __name__ == '__main__':
     db = DB()
     # db.delete_tables()
     # db.input_sample_data()
-    db.query_6("2018-11-26")
-    # db.query_4(2)
+    db.query_4(2)
     # db.query_3('2018-11-24')
     # db.query_2("2018-11-26")
     # db.query_1(2)
