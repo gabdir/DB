@@ -349,7 +349,11 @@ class DB():
         and first.date = second.date 
         and first.price = second.price) > 1""")
 
-        print(cur.fetchall()[0][0])
+        try:
+            print(cur.fetchall()[0][0] > 0)
+        except(IndexError):
+            print(False)
+            pass
 
 
         self.conn.close()
