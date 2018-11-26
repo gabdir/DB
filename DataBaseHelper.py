@@ -1,7 +1,6 @@
 import datetime
 import psycopg2
 
-
 class DB():
 
     def __init__(self):
@@ -79,8 +78,9 @@ class DB():
             CREATE TABLE History_of_charging (
                 Identification_num SERIAL,
                 UID SERIAL,
-                starting_ch TIMESTAMP,
-                ending_ch TIMESTAMP,
+                starting_ch TIME,
+                ending_ch TIME,
+                date DATE,
                 price DOUBLE PRECISION,
                 FOREIGN KEY (Identification_num) REFERENCES Car(identification_num) ON UPDATE CASCADE ON DELETE CASCADE,
                 FOREIGN KEY (UID) REFERENCES Station(uid) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -219,10 +219,10 @@ class DB():
                         ('3', '2', 'dich2')
                     """,
                     """
-                    INSERT INTO history_of_charging (identification_num, uid, starting_ch, ending_ch, price)
-                    VALUES ('1', '2', '2018-11-25 8:00', '2018-11-25 8:50', 500),
-                     ('2', '3', '2018-11-26 10:00', '2018-11-26 10:10', 300),
-                     ('3', '3', '2018-11-24 11:00', '2018-11-24 11:30', 400)
+                    INSERT INTO history_of_charging (identification_num, uid, starting_ch, ending_ch, date, price)
+                    VALUES ('1', '2', '8:00', '8:50', '2018-11-25', 500),
+                     ('2', '3', '10:00', '10:10', '2018-11-26', 300),
+                     ('3', '3', '11:00', '11:30', '2018-11-24',400)
                     """,
                     """
                     INSERT INTO history_of_trip (identification_num, username, starting_loc, client_loc, final_loc,date,starting_tr,ending_tr)
@@ -277,45 +277,64 @@ class DB():
             self.conn.close()
 
     def query_2(self, date):
+        time = datetime.datetime.strptime(date, "%Y-%m-%d")
+        time2 = datetime.datetime.strptime(date, "%Y-%m-%d") + datetime.timedelta(hours=1)
         for i in range(24):
             query ="""SELECT COUNT(identification_num)
                       FROM history_of_charging
-                      WHERE starting_ch < date + INTERVAL '1 hour' and
-                      ending_ch> date + str(i) 
-                    """
+                      WHERE date = '""" + date + """' and starting_ch < '""" + str(time2).split(" ")[1] + """' and ending_ch > '""" + str(time).split(" ")[1] + """'"""
+
+            time = time + datetime.timedelta(hours=1)
+            time2 = time2 + datetime.timedelta(hours=1)
             try:
                 self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
                 cur = self.conn.cursor()
-                count = cur.execute(query)
+                cur.execute(query)
+                count = cur.fetchall()
+                for i in count:
+                    print(i)
+
                 cur.close()
                 self.conn.commit()
-                print(count)
             except (Exception, psycopg2.DatabaseError) as error:
                 print(error)
 
             finally:
                 self.conn.close()
         #
-        # def query_3(self, date):
-        #     self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
-        #     cur = self.conn.cursor()
-        #     time_arr = [[7, 10], [12, 14], [17, 19]]
-        #     car_amount = cur.execute("""SELECT COUNT(identification_num) FROM Car""")
-        #     average_amount = [3][7]
-        #     for i in range(7):
-        #         for j in time_arr:
-        #             query = """SELECT COUNT(identification_num)
-        #                              FROM history_of_trip
-        #                              WHERE starting_tr<""" + date + str(j[0]) + """ and
-        #                              ending_tr>""" + date + str(j[1])
-        #             average_amount[j][i] = cur.execute(query) / car_amount
-        #
-        #     morning = average_amount[0].sum() / 7
-        #     afternoon = average_amount[1].sum() / 7
-        #     evening = average_amount[2].sum() / 7
-        #
-        #     self.conn.close()
-        #
+    def query_3(self, date):
+        time = datetime.datetime.strptime(date, "%Y-%m-%d")
+        self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
+        cur = self.conn.cursor()
+        time_arr = [[7, 10], [12, 14], [17, 19]]
+        cur.execute("""SELECT COUNT(identification_num) FROM Car""")
+        car_amount = cur.fetchall()[0][0]
+        average_amount = [[], [], []]
+        k = 0
+        for i in range(7):
+            for j in time_arr:
+                query = """SELECT COUNT(identification_num)
+                    FROM history_of_trip
+                    WHERE date = '""" + str(time).split(" ")[0] + """' and starting_tr<'""" + str(j[1]) + """:00:00' and
+                    ending_tr>'""" + str(j[0]) + """:00:00'"""
+                time = time + datetime.timedelta(days=1)
+                cur.execute(query)
+                average_amount[k].append(cur.fetchall()[0][0]/car_amount)
+                k += 1
+
+            k = 0
+
+
+        morning = sum(average_amount[0]) / 7
+        afternoon = sum(average_amount[1]) / 7
+        evening = sum(average_amount[2]) / 7
+
+
+        print(morning, afternoon, evening)
+        self.conn.close()
+
+
+
     def query_4(self,username):
         self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
         cur = self.conn.cursor()
@@ -439,5 +458,7 @@ class DB():
 if __name__ == '__main__':
     db = DB()
     # db.delete_tables()
-    db.input_sample_data()
+    # db.input_sample_data()
+    # db.query_3('2018-11-24')
+    db.query_2("2018-11-26")
     # db.query_1(2)
