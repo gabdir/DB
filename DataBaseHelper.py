@@ -1,4 +1,6 @@
 import datetime
+import math
+
 import psycopg2
 
 class DB():
@@ -424,25 +426,30 @@ class DB():
 
         self.conn.close()
 
-        def query_7(self, date):
-            self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
-            cur = self.conn.cursor()
-            time_arr = [[7, 10], [12, 14], [17, 19]]
-            car_amount = cur.execute("""SELECT COUNT(identification_num) FROM Car""")
-            average_amount = [3][7]
-            for i in range(7):
-                for j in time_arr:
-                    query = """SELECT COUNT(identification_num)
-                                     FROM history_of_trip
-                                     WHERE starting_ch<""" + date + str(j[0]) + """ and
-                                     ending_ch>""" + date + str(j[1])
-                    average_amount[j][i] = cur.execute(query) / car_amount
+    def query_7(self, date):
+        print("\nQuery 7:")
+        time = datetime.datetime.strptime(date, "%Y-%m-%d") - datetime.timedelta(days=90)
+        self.conn = psycopg2.connect("dbname='postgres' user='test' host='10.90.138.41' password='test'")
+        cur = self.conn.cursor()
+        cur.execute("""SELECT identification_num FROM Car""")
+        id = cur.fetchall()
+        date2 = str(time).split(" ")[0]
+        arr = []
+        for i in id:
+            query = """SELECT COUNT(identification_num) FROM history_of_trip where identification_num='""" + str(
+                i[0]) + """' AND date>'""" + date2 + """'"""
 
-            morning = average_amount[0].sum() / 7
-            afternoon = average_amount[1].sum() / 7
-            evening = average_amount[2].sum() / 7
+            cur.execute(query)
+            arr.append((cur.fetchall()[0][0], i[0]))
 
-            self.conn.close()
+        arr.sort()
+        count = math.ceil(arr.__len__() / 10)
+        print("Car Id:")
+        for i in range(0, count):
+            print(arr[i][1])
+
+        self.conn.close()
+
     #some changes in query8, we are finding number of customers using the same stations
     def query_8(self, date):
 
@@ -500,11 +507,10 @@ class DB():
 
 if __name__ == '__main__':
     db = DB()
-    db.delete_tables()
+    # db.delete_tables()
     # db.input_sample_data()
-    # db.query_5('2018-11-26')
-    # db.query_4(2)
-    # db.query_3('2018-11-24')
-    # db.query_2("2018-11-26")
-    # db.query_1(2)
+    db.query_4(2)
 
+    #db.query_7('2018-11-24')
+    db.query_7("2018-11-26")
+    # db.query_1(2)
